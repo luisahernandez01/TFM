@@ -32,13 +32,15 @@ silver = (df.groupBy("equipo", "uuid", "fecha").agg(
     F.percentile_approx("speed", 0.95).alias("speed_p95"),
     banda(0, 0.5).alias("fr_parado"), banda(0.5, 2).alias("fr_caminar"),
     banda(2, 4).alias("fr_trote"), banda(4, 5.5).alias("fr_carrera"),
-    banda(5.5).alias("fr_sprint"),
+    banda(5.5).alias("fr_hsr"),          # alta velocidad: >= 5.5 m/s (19.8 km/h), incluye sprint
+    banda(6.94).alias("fr_sprint"),      # sprint: >= 6.94 m/s (25 km/h)
     F.avg("acc_mag").alias("acc_mag_media"),
     F.percentile_approx("acc_mag", 0.99).alias("acc_mag_p99"),
     F.sum("inst_acc_impulse").alias("impulso_acc_suma"))
   .withColumn("jugadora", F.concat_ws("-", "equipo", "uuid"))
   .withColumn("duracion_min", F.col("tiempos_unicos") * 0.1 / 60)
   .withColumn("dist_m", F.col("speed_media") * F.col("tiempos_unicos") * 0.1)
+  .withColumn("dist_hsr_m", F.col("fr_hsr") * F.col("dist_m"))
   .withColumn("dist_sprint_m", F.col("fr_sprint") * F.col("dist_m"))
   .withColumn("ok_duracion", F.col("duracion_min") >= 20)
   .withColumn("ok_gps", F.col("pct_gps_invalido") < 0.2)

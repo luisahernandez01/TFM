@@ -16,7 +16,7 @@ s.groupBy(F.date_format("fecha", "yyyy-MM").alias("mes")).agg(
 
 # distribuciones de candidatos a indicador
 s.filter("ok_duracion and ok_gps").select(
-    "duracion_min", "dist_m", "speed_max", "dist_sprint_m", "acc_mag_media", "impulso_acc_suma"
+    "duracion_min", "dist_m", "speed_max", "dist_hsr_m", "dist_sprint_m", "acc_mag_media", "impulso_acc_suma"
 ).summary("min", "25%", "50%", "75%", "99%", "max").show()
 
 # medidas subjetivas disponibles
