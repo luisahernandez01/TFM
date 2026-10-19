@@ -13,9 +13,36 @@ def banda(lo, hi=None):
     c = (F.col("speed") >= lo) if hi is None else ((F.col("speed") >= lo) & (F.col("speed") < hi))
     return F.avg(c.cast("int"))
 
-def silver_mes(ruta_parquets):
-    df = (spark.read.parquet(ruta_parquets)
-          .withColumn("ruta", F.col("_metadata.file_path"))
+TIPOS = {"lat": "double", "lon": "double", "speed": "double", "inst_acc_impulse": "double",
+         "accl_x": "double", "accl_y": "double", "accl_z": "double",
+         "gyro_x": "double", "gyro_y": "double", "gyro_z": "double",
+         "heart_rate": "long", "hacc": "long", "hdop": "long",
+         "signal_quality": "long", "num_satellites": "long"}
+
+def leer_parquets(patron):
+    """Lee los parquet de un mes agrupados por esquema real y los lleva a tipos fijos.
+    Evita el error de tipo cuando un archivo trae INT64 donde otros traen double."""
+    import glob
+    import pyarrow.parquet as pq
+    grupos = {}
+    for a in sorted(glob.glob(patron)):
+        firma = tuple((c.name, str(c.type)) for c in pq.read_schema(a))
+        grupos.setdefault(firma, []).append(a)
+    if len(grupos) > 1:
+        print("   esquemas distintos en el mes:", len(grupos))
+    partes = []
+    for firma, lista in grupos.items():
+        d = spark.read.parquet(*lista)
+        partes.append(d.select("player_name", "time",
+                               *[F.col(c).cast(t).alias(c) for c, t in TIPOS.items()],
+                               F.col("_metadata.file_path").alias("ruta")))
+    out = partes[0]
+    for q in partes[1:]:
+        out = out.unionByName(q)
+    return out
+
+def silver_mes(patron):
+    df = (leer_parquets(patron)
           .withColumn("fecha", F.to_date(F.regexp_extract("ruta", r"/(\d{4}-\d{2}-\d{2})-Team", 1)))
           .withColumn("equipo", F.regexp_extract("ruta", r"-(Team[AB])-", 1))
           .withColumn("uuid", F.regexp_extract("ruta", r"Team[AB]-([0-9a-f\-]{36})\.parquet", 1))
