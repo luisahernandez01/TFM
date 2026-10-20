@@ -1,0 +1,22 @@
+name: tfm_soccermon
+version: "1.0.0"
+config-version: 2
+profile: tfm_soccermon
+
+model-paths: ["models"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  # carpeta con silver_objetivo.parquet y silver_subjetivo.parquet (relativa a donde se corre dbt)
+  data_dir: "../data"
+  # umbrales de calidad de una sesión válida
+  min_duracion_min: 20
+  max_gps_invalido: 0.2
+
+models:
+  tfm_soccermon:
+    staging:
+      +materialized: view
+    gold:
+      +materialized: table

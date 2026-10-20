@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: stg_objetivo
+    description: Silver objetivo, una fila por jugadora y día.
+    tests:
+      - dbt_utils_free_unique_combo
+    columns:
+      - name: jugadora
+        tests: [not_null]
+      - name: fecha
+        tests: [not_null]
+      - name: duracion_min
+        tests: [not_null]
+
+  - name: stg_subjetivo
+    description: Silver subjetivo en formato largo, una fila por jugadora, día y medida.
+    columns:
+      - name: medida
+        tests:
+          - accepted_values:
+              values: [acwr, atl, ctl28, ctl42, daily_load, fatigue, monotony, mood, readiness,
+                       sleep_duration, sleep_quality, soreness, strain, stress, weekly_load]
+
+  - name: gold_sesiones
+    description: Indicadores de carga por sesión válida y medidas subjetivas del mismo día.
+    columns:
+      - name: dist_m
+        tests: [not_null]
+      - name: duracion_min
+        tests:
+          - not_null
+      - name: speed_max
+        tests: [not_null]
+
+  - name: gold_carga_rolling
+    description: Carga aguda, crónica, ACWR, monotonía y tensión por jugadora con calendario completo.

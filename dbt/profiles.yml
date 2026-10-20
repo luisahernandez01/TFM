@@ -1,0 +1,7 @@
+tfm_soccermon:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: ../data/tfm.duckdb
+      threads: 4
