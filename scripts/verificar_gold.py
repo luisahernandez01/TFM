@@ -15,6 +15,8 @@ print("\n== Sesiones descartadas por regla (sobre las que ya pasan duración mí
 base = "from stg_objetivo where duracion_min >= 20 and pct_gps_invalido < 0.2"
 print("speed_max > 12 m/s:", q(f"select count(*) {base} and speed_max > 12")[0][0])
 print("duracion > 240 min:", q(f"select count(*) {base} and duracion_min > 240")[0][0])
+print("dist_por_min > 150:", q(f"select count(*) {base} and dist_m / duracion_min > 150")[0][0])
+print("dist_por_min < 5:  ", q(f"select count(*) {base} and dist_m / duracion_min < 5")[0][0])
 
 print("\n== Sesiones válidas por equipo y año ==")
 for r in q("select equipo, year(fecha) anio, count(*) n, count(distinct jugadora) jug, "

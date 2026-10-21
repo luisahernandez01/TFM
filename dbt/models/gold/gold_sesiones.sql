@@ -9,6 +9,7 @@ with obj as (
       and pct_gps_invalido < {{ var('max_gps_invalido') }}
       and speed_max <= {{ var('max_speed_ms') }}
       and duracion_min <= {{ var('max_duracion_min') }}
+      and dist_m / duracion_min between {{ var('min_dist_por_min') }} and {{ var('max_dist_por_min') }}
 ),
 subj as (
     select

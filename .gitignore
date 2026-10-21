@@ -12,3 +12,6 @@ data_test/
 dbt/.user.yml
 dbt/target/
 dbt/logs/
+!gold/
+!gold/*.parquet
+!gold/*.csv

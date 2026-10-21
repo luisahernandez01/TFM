@@ -16,6 +16,9 @@ vars:
   # plausibilidad física: por encima se considera error de sensor
   max_speed_ms: 12
   max_duracion_min: 240
+  # distancia media por minuto de la sesión (m/min): fuera de este rango es sensor quieto o saltos de GPS
+  min_dist_por_min: 5
+  max_dist_por_min: 150
 
 models:
   tfm_soccermon:
