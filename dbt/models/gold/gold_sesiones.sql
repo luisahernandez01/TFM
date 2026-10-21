@@ -1,11 +1,14 @@
 -- Gold: una fila por sesión válida (jugadora y día) con indicadores de carga externa
 -- calculados con GPS e IMU, y las medidas subjetivas del mismo día cuando existen.
--- Una sesión es válida si dura lo suficiente y el GPS es confiable.
+-- Una sesión es válida si dura lo suficiente, el GPS es confiable y los valores son físicamente plausibles
+-- (se descartan saltos de GPS con velocidades imposibles y sensores dejados encendidos por horas).
 with obj as (
     select *
     from {{ ref('stg_objetivo') }}
     where duracion_min >= {{ var('min_duracion_min') }}
       and pct_gps_invalido < {{ var('max_gps_invalido') }}
+      and speed_max <= {{ var('max_speed_ms') }}
+      and duracion_min <= {{ var('max_duracion_min') }}
 ),
 subj as (
     select

@@ -13,6 +13,9 @@ vars:
   # umbrales de calidad de una sesión válida
   min_duracion_min: 20
   max_gps_invalido: 0.2
+  # plausibilidad física: por encima se considera error de sensor
+  max_speed_ms: 12
+  max_duracion_min: 240
 
 models:
   tfm_soccermon:
