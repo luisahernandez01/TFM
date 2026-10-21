@@ -9,3 +9,6 @@ __pycache__/
 data/
 data_test/
 *.duckdb
+dbt/.user.yml
+dbt/target/
+dbt/logs/
