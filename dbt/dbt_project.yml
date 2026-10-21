@@ -17,6 +17,6 @@ vars:
 models:
   tfm_soccermon:
     staging:
-      +materialized: view
+      +materialized: table
     gold:
       +materialized: table

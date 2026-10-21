@@ -19,8 +19,9 @@ models:
       - name: medida
         tests:
           - accepted_values:
-              values: [acwr, atl, ctl28, ctl42, daily_load, fatigue, monotony, mood, readiness,
-                       sleep_duration, sleep_quality, soreness, strain, stress, weekly_load]
+              arguments:
+                values: [acwr, atl, ctl28, ctl42, daily_load, fatigue, monotony, mood, readiness,
+                         sleep_duration, sleep_quality, soreness, strain, stress, weekly_load]
 
   - name: gold_sesiones
     description: Indicadores de carga por sesión válida y medidas subjetivas del mismo día.
