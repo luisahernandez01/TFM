@@ -1,26 +1,38 @@
 # Databricks notebook source
 # Prueba de carga de gold en Databricks Free Edition.
-# Con el repo clonado como Git folder, los parquet de la carpeta gold/ ya están en el espacio de trabajo.
+#
+# ORIGEN = "repo":    lee los parquet de la carpeta gold/ del Git folder (repo clonado en Databricks).
+# ORIGEN = "volumen": lee los parquet de un volumen "gold" al que se subieron a mano
+#                     (Catalog > tu catálogo > default > crear volumen "gold" > Upload to this volume).
+ORIGEN = "repo"
+
 import os
 import pandas as pd
 from pyspark.sql import functions as F
 
-raiz = os.path.dirname(os.getcwd())          # el notebook está en TFM/notebooks, la raíz es TFM
-carpeta = f"{raiz}/gold"
-print("carpeta gold:", carpeta)
-print(os.listdir(carpeta))
+cat = spark.sql("select current_catalog()").first()[0]
+
+if ORIGEN == "repo":
+    carpeta = f"{os.path.dirname(os.getcwd())}/gold"     # el notebook está en TFM/notebooks
+    print("carpeta gold:", carpeta, os.listdir(carpeta))
+    ses = spark.createDataFrame(pd.read_parquet(f"{carpeta}/gold_sesiones.parquet"))
+    rol = spark.createDataFrame(pd.read_parquet(f"{carpeta}/gold_carga_rolling.parquet"))
+else:
+    spark.sql(f"create volume if not exists {cat}.default.gold")
+    carpeta = f"/Volumes/{cat}/default/gold"
+    print("carpeta gold:", carpeta)
+    display(dbutils.fs.ls(carpeta))
+    ses = spark.read.parquet(f"{carpeta}/gold_sesiones.parquet")
+    rol = spark.read.parquet(f"{carpeta}/gold_carga_rolling.parquet")
 
 # COMMAND ----------
-# Leer los parquet y comparar con lo que mostró scripts/verificar_gold.py en el computador
-ses = spark.createDataFrame(pd.read_parquet(f"{carpeta}/gold_sesiones.parquet"))
-rol = spark.createDataFrame(pd.read_parquet(f"{carpeta}/gold_carga_rolling.parquet"))
-
+# Comparar con lo que mostró scripts/verificar_gold.py en el computador
 print("gold_sesiones:", ses.count(), "esperado 9792")
 print("gold_carga_rolling:", rol.count(), "esperado 23671")
 ses.printSchema()
 
 # COMMAND ----------
-# Controles de coherencia: deben coincidir con la verificación local
+# Controles de coherencia
 ses.groupBy("equipo", F.year("fecha").alias("anio")).agg(
     F.count("*").alias("sesiones"),
     F.countDistinct("jugadora").alias("jugadoras"),
@@ -34,12 +46,6 @@ print("corr dist_m vs carga_subj:", round(con.stat.corr("dist_m", "carga_subj"),
 
 # COMMAND ----------
 # Guardar como tablas para trabajar con SQL
-cat = spark.sql("select current_catalog()").first()[0]
 ses.write.mode("overwrite").saveAsTable(f"{cat}.default.gold_sesiones")
 rol.write.mode("overwrite").saveAsTable(f"{cat}.default.gold_carga_rolling")
 display(spark.sql(f"select count(*) as filas from {cat}.default.gold_sesiones"))
-
-# COMMAND ----------
-# Alternativa si el notebook no puede leer la carpeta del repo: subir los parquet a un volumen
-# (Catalog > tu catálogo > default > crear volumen "gold" > Upload) y leer con:
-# ses = spark.read.parquet(f"/Volumes/{cat}/default/gold/gold_sesiones.parquet")
