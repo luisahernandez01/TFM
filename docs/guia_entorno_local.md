@@ -31,7 +31,7 @@ cd C:\Users\<tu usuario>\Documents\TFM
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe --version
 .\.venv\Scripts\python.exe -m pip install dbt-duckdb
-.\.venv\Scripts\python.exe -m dbt --version
+.\.venv\Scripts\dbt.exe --version
 ```
 
 Notas:
@@ -61,7 +61,7 @@ dir data
 
 ```powershell
 cd dbt
-..\.venv\Scripts\python.exe -m dbt build --profiles-dir .
+..\.venv\Scripts\dbt.exe build --profiles-dir .
 ```
 
 Debe terminar con todos los modelos creados y las pruebas en PASS. El resultado queda en `data\tfm.duckdb` (tablas `gold_sesiones` y `gold_carga_rolling`).
@@ -72,7 +72,7 @@ Para probar sin datos reales:
 cd ..
 .\.venv\Scripts\python.exe scripts\datos_sinteticos.py data_test
 cd dbt
-..\.venv\Scripts\python.exe -m dbt build --profiles-dir . --vars "{data_dir: ../data_test}"
+..\.venv\Scripts\dbt.exe build --profiles-dir . --vars "{data_dir: ../data_test}"
 ```
 
 ## 6. Subir cambios
@@ -93,4 +93,5 @@ No se suben `.venv`, `data`, `.duckdb`, `.parquet` ni `.zip` (ya están en `.git
 | `winget` no se reconoce | No viene en todos los equipos | Instalar a mano desde las páginas oficiales |
 | `The module '.venv' could not be loaded` | Falta el `.\` o el entorno no existe en esa carpeta | Usar `.\.venv\...` y comprobar con `dir -Force` |
 | `running scripts is disabled` | Política de ejecución de PowerShell | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
+| `No module named dbt.__main__` | En Windows no se usa `python -m dbt` | Ejecutar `..\.venv\Scripts\dbt.exe build --profiles-dir .` |
 | `Microsoft Visual C++ 14.0 or greater is required` / `Failed building wheel for pyyaml duckdb` | Python demasiado nuevo (3.15) | Usar Python 3.12 y recrear `.venv` |
